@@ -1,0 +1,12 @@
+FROM ubuntu
+
+RUN apt-get update \
+    && apt-get install -y wget \
+    && wget https://github.com/sorintlab/stolon/releases/download/v0.13.0/stolon-v0.13.0-linux-amd64.tar.gz \
+    && tar -C /root/ -xzvf stolon-v0.13.0-linux-amd64.tar.gz \
+    && cp /root/stolon-v0.13.0-linux-amd64/bin/stolon-* /usr/local/bin/ \
+    && rm -fr stolon-v0.13.0-linux-amd64.tar.gz /root/stolon-v0.13.0-linux-amd64 \
+    && apt-get purge -y --auto-remove wget \
+    && apt-get clean
+
+ENTRYPOINT /usr/local/bin/stolon-sentinel --cluster-name $STOLON_CLUSTER_NAME --store-backend $STOLON_STORE_BACKEND --store-endpoints $STOLON_STORE_ENDPOINTS

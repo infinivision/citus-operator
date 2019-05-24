@@ -1,0 +1,63 @@
+version: "3.2"
+services:
+  etcd:
+    image: "bitnami/etcd"
+    network_mode: "host"
+    env:
+      - name: ALLOW_NONE_AUTHENTICATION
+        value: "yes"
+    restart: on-failure
+  st_keeper0:
+    image: "infinivision/stolon-keeper"
+    network_mode: "host"
+    env_file: keeper0_env.txt
+    volumes:
+      - type: bind
+        source: /opt/data/stolon-data0
+        target: /stolon-data
+      - type: bind
+        source: /usr/share/zoneinfo/Asia/Shanghai
+        target: /etc/localtime
+    restart: on-failure
+  st_keeper1:
+    image: "infinivision/stolon-keeper"
+    network_mode: "host"
+    env_file: keeper1_env.txt
+    volumes:
+      - type: bind
+        source: /opt/data/stolon-data1
+        target: /stolon-data
+      - type: bind
+        source: /usr/share/zoneinfo/Asia/Shanghai
+        target: /etc/localtime
+    restart: on-failure
+  st_keeper2:
+    image: "infinivision/stolon-keeper"
+    network_mode: "host"
+    env_file: keeper2_env.txt
+    volumes:
+      - type: bind
+        source: /opt/data/stolon-data2
+        target: /stolon-data
+      - type: bind
+        source: /usr/share/zoneinfo/Asia/Shanghai
+        target: /etc/localtime
+    restart: on-failure
+  st_proxy:
+    image: "infinivision/stolon-proxy"
+    network_mode: "host"
+    env_file: proxy_env.txt
+    volumes:
+      - type: bind
+        source: /usr/share/zoneinfo/Asia/Shanghai
+        target: /etc/localtime
+    restart: on-failure
+  st_sentinel:
+    image: "infinivision/stolon-sentinel"
+    network_mode: "host"
+    env_file: sentinel_env.txt
+    volumes:
+      - type: bind
+        source: /usr/share/zoneinfo/Asia/Shanghai
+        target: /etc/localtime
+    restart: on-failure

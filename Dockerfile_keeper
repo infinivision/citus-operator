@@ -19,6 +19,9 @@ RUN apt-get install -y protobuf-c-compiler libprotobuf-c0-dev \
     && make install \
     && tar czvf /postgresql-$PG_MAJOR-cstore_fdw-1.6.2.tgz /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/cstore_fdw* /usr/lib/postgresql/$PG_MAJOR/lib/cstore_fdw.so /usr/share/postgresql/$PG_MAJOR/extension/cstore_fdw*
 
+RUN wget https://github.com/sorintlab/stolon/releases/download/v0.13.0/stolon-v0.13.0-linux-amd64.tar.gz \
+    && tar -C /root/ -xzvf stolon-v0.13.0-linux-amd64.tar.gz
+
 FROM postgres:11
 ARG VERSION=8.2.1
 LABEL maintainer="Citus Data https://citusdata.com" \
@@ -54,7 +57,14 @@ COPY --from=pg_builder /usr/share/postgresql/$PG_MAJOR/extension/roaringbitmap* 
 COPY --from=pg_builder /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/cstore_fdw* /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/
 COPY --from=pg_builder /usr/lib/postgresql/$PG_MAJOR/lib/cstore_fdw.so /usr/lib/postgresql/$PG_MAJOR/lib/
 COPY --from=pg_builder /usr/share/postgresql/$PG_MAJOR/extension/cstore_fdw* /usr/share/postgresql/$PG_MAJOR/extension/
+COPY --from=pg_builder /usr/lib/x86_64-linux-gnu/libprotobuf-c.so.1 /usr/lib/x86_64-linux-gnu/libprotobuf-c.so.1
 
 # add citus to default PostgreSQL config
 RUN echo "shared_preload_libraries='citus, pg_cron, cstore_fdw'" >> /usr/share/postgresql/postgresql.conf.sample
 
+# install stolon-keeper
+COPY --from=pg_builder /root/stolon-v0.13.0-linux-amd64/bin/stolon-keeper /usr/local/bin/
+
+USER postgres:postgres
+
+ENTRYPOINT /usr/local/bin/stolon-keeper --cluster-name $STOLON_CLUSTER_NAME --store-backend $STOLON_STORE_BACKEND --store-endpoints $STOLON_STORE_ENDPOINTS --uid $STKEEPER_UID --data-dir /stolon-data --pg-bin-path /usr/lib/postgresql/11/bin --pg-su-password $STKEEPER_PG_SU_PASSWORD --pg-repl-username $STKEEPER_PG_REPL_USERNAME --pg-repl-password $STKEEPER_PG_REPL_PASSWORD --pg-listen-address 0.0.0.0 --pg-port $STKEEPER_PG_PORT
