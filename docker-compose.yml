@@ -3,9 +3,8 @@ services:
   etcd:
     image: "bitnami/etcd"
     network_mode: "host"
-    env:
-      - name: ALLOW_NONE_AUTHENTICATION
-        value: "yes"
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
     restart: on-failure
   st_keeper0:
     image: "infinivision/stolon-keeper"
