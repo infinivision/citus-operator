@@ -75,7 +75,7 @@ COPY --from=pg_builder /root/gosu /usr/local/bin/
 RUN groupadd -r stolon && useradd -r -g stolon stolon
 
 # run as the non-root user
-ENTRYPOINT chown -R stolon:stolon /stolon-data && exec gosu stolon:stolon /usr/local/bin/stolon-keeper --data-dir /stolon-data --pg-bin-path /usr/lib/postgresql/11/bin --pg-listen-address 0.0.0.0
+ENTRYPOINT chown -R stolon:stolon /stolon-data && exec gosu stolon:stolon /usr/local/bin/stolon-keeper --data-dir /stolon-data --pg-bin-path /usr/lib/postgresql/11/bin
 
 
 FROM ubuntu AS proxy
