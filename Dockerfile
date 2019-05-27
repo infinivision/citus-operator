@@ -71,11 +71,8 @@ COPY --from=pg_builder /root/stolon-v0.13.0-linux-amd64/bin/stolon-keeper /usr/l
 # install gosu
 COPY --from=pg_builder /root/gosu /usr/local/bin/
 
-# create non-root user
-RUN groupadd -r stolon && useradd -r -g stolon stolon
-
 # run as the non-root user
-ENTRYPOINT chown -R stolon:stolon /stolon-data && exec gosu stolon:stolon /usr/local/bin/stolon-keeper --data-dir /stolon-data --pg-bin-path /usr/lib/postgresql/11/bin
+ENTRYPOINT chown -R postgres:postgres /stolon-data && exec gosu postgres:postgres /usr/local/bin/stolon-keeper --data-dir /stolon-data --pg-bin-path /usr/lib/postgresql/11/bin
 
 
 FROM ubuntu AS proxy
