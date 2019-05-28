@@ -1,10 +1,13 @@
 version: "3.2"
 services:
   etcd:
-    image: "bitnami/etcd"
+    image: "quay.io/coreos/etcd:v3.3.13"
     network_mode: "host"
-    environment:
-      - ALLOW_NONE_AUTHENTICATION=yes
+    volumes:
+      - type: bind
+        source: /usr/share/zoneinfo/Asia/Shanghai
+        target: /etc/localtime
+    command: /usr/local/bin/etcd
     restart: on-failure
   st_keeper0:
     image: "infinivision/stolon-keeper"
@@ -56,6 +59,20 @@ services:
     network_mode: "host"
     env_file: sentinel_env.txt
     volumes:
+      - type: bind
+        source: /usr/share/zoneinfo/Asia/Shanghai
+        target: /etc/localtime
+    restart: on-failure
+  prometheus:
+    image: "quay.io/prometheus/prometheus"
+    network_mode: "host"
+    volumes:
+      - type: bind
+        source: /opt/data/prometheus
+        target: /prometheus
+      - type: bind
+        source: prometheus.yml
+        target: /etc/prometheus/prometheus.yml
       - type: bind
         source: /usr/share/zoneinfo/Asia/Shanghai
         target: /etc/localtime
