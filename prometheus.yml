@@ -1,0 +1,16 @@
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+  - job_name: "st_keeper"
+    static_configs:
+      - targets: ["127.0.0.1:8080", "127.0.0.1:8082", "127.0.0.1:8083"]
+  - job_name: "st_proxy"
+    static_configs:
+      - targets: ["127.0.0.1:8084"]
+  - job_name: "st_sentinel"
+    static_configs:
+      - targets: ["127.0.0.1:8085"]

@@ -68,7 +68,7 @@ services:
     network_mode: "host"
     volumes:
       - type: bind
-        source: /opt/data/prometheus
+        source: /opt/data/prometheus-data
         target: /prometheus
       - type: bind
         source: prometheus.yml
