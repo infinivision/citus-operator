@@ -63,15 +63,25 @@ services:
         source: /usr/share/zoneinfo/Asia/Shanghai
         target: /etc/localtime
     restart: on-failure
+  postgres_exporter:
+    image: "wrouesnel/postgres_exporter"
+    network_mode: "host"
+    env_file: postgres_exporter_env.txt
+    volumes:
+      - type: bind
+        source: /usr/share/zoneinfo/Asia/Shanghai
+        target: /etc/localtime
+    restart: on-failure
   prometheus:
     image: "quay.io/prometheus/prometheus"
     network_mode: "host"
+    user: "0"
     volumes:
       - type: bind
         source: /opt/data/prometheus-data
         target: /prometheus
       - type: bind
-        source: prometheus.yml
+        source: /opt/data/prometheus.yml
         target: /etc/prometheus/prometheus.yml
       - type: bind
         source: /usr/share/zoneinfo/Asia/Shanghai

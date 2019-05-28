@@ -1,0 +1,2 @@
+DATA_SOURCE_NAME=postgresql://postgres:supassword@127.0.0.1:10000/postgres?sslmode=disable,postgresql://postgres:supassword@127.0.0.1:10001/postgres?sslmode=disable,postgresql://postgres:supassword@127.0.0.1:10002/postgres?sslmode=disable
+PG_EXPORTER_WEB_LISTEN_ADDRESS=:8085
