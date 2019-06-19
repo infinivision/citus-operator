@@ -25,6 +25,9 @@ RUN wget https://github.com/sorintlab/stolon/releases/download/v0.13.0/stolon-v0
 RUN wget -O /root/gosu https://github.com/tianon/gosu/releases/download/1.11/gosu-amd64 \
     && chmod +x /root/gosu
 
+RUN wget -O /root/dataplaneapi https://github.com/haproxytech/dataplaneapi/releases/download/v1.0.0/dataplaneapi \
+    && chmod +x /root/dataplaneapi
+
 FROM postgres:11 AS keeper
 ARG VERSION=8.2.1
 LABEL maintainer="Citus Data https://citusdata.com" \
@@ -95,3 +98,10 @@ COPY --from=pg_builder /root/gosu /usr/local/bin/
 RUN groupadd -r stolon && useradd -r -g stolon stolon
 # run as the non-root user
 ENTRYPOINT exec gosu stolon:stolon /usr/local/bin/stolon-sentinel
+
+
+FROM haproxy AS haproxyplus
+# install dataplaneapi
+COPY --from=pg_builder /root/dataplaneapi /usr/local/bin/
+# install gosu
+COPY --from=pg_builder /root/gosu /usr/local/bin/
