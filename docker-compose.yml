@@ -7,7 +7,7 @@ services:
       - type: bind
         source: /usr/share/zoneinfo/Asia/Shanghai
         target: /etc/localtime
-    command: /usr/local/bin/etcd
+    command: /usr/local/bin/etcd --auto-compaction-mode=revision --auto-compaction-retention=1000
     restart: on-failure
   st_keeper0:
     image: "infinivision/stolon-keeper"
@@ -45,20 +45,13 @@ services:
         source: /usr/share/zoneinfo/Asia/Shanghai
         target: /etc/localtime
     restart: on-failure
-  st_proxy:
-    image: "infinivision/stolon-proxy"
+  haproxy:
+    image: "infinivision/haproxy"
     network_mode: "host"
-    env_file: proxy_env.txt
     volumes:
       - type: bind
-        source: /usr/share/zoneinfo/Asia/Shanghai
-        target: /etc/localtime
-    restart: on-failure
-  st_sentinel:
-    image: "infinivision/stolon-sentinel"
-    network_mode: "host"
-    env_file: sentinel_env.txt
-    volumes:
+        source: /opt/data/haproxy.cfg
+        target: /usr/local/etc/haproxy/haproxy.cfg
       - type: bind
         source: /usr/share/zoneinfo/Asia/Shanghai
         target: /etc/localtime

@@ -70,35 +70,16 @@ RUN echo "shared_preload_libraries='citus, pg_cron, cstore_fdw'" >> /usr/share/p
 
 # install stolon-keeper
 COPY --from=pg_builder /root/stolon-v0.13.0-linux-amd64/bin/stolon-keeper /usr/local/bin/
-
-# install gosu
-COPY --from=pg_builder /root/gosu /usr/local/bin/
-
-# run as the non-root user
-ENTRYPOINT chown -R postgres:postgres /stolon-data && exec gosu postgres:postgres /usr/local/bin/stolon-keeper --data-dir /stolon-data --pg-bin-path /usr/lib/postgresql/11/bin
-
-
-FROM ubuntu AS proxy
-# install stolon-proxy
-COPY --from=pg_builder /root/stolon-v0.13.0-linux-amd64/bin/stolon-proxy /usr/local/bin/
-# install gosu
-COPY --from=pg_builder /root/gosu /usr/local/bin/
-# create non-root user
-RUN groupadd -r stolon && useradd -r -g stolon stolon
-# run as the non-root user
-ENTRYPOINT exec gosu stolon:stolon /usr/local/bin/stolon-proxy
-
-
-FROM ubuntu AS sentinel
 # install stolon-sentinel
 COPY --from=pg_builder /root/stolon-v0.13.0-linux-amd64/bin/stolon-sentinel /usr/local/bin/
+
 # install gosu
 COPY --from=pg_builder /root/gosu /usr/local/bin/
-# create non-root user
-RUN groupadd -r stolon && useradd -r -g stolon stolon
-# run as the non-root user
-ENTRYPOINT exec gosu stolon:stolon /usr/local/bin/stolon-sentinel
 
+# run as the non-root user
+ENTRYPOINT chown -R postgres:postgres /stolon-data \
+    && start-stop-daemon --start --background --no-close --chuid postgres:postgres --exec /usr/local/bin/stolon-sentinel \
+    && exec gosu postgres:postgres /usr/local/bin/stolon-keeper --data-dir /stolon-data --pg-bin-path /usr/lib/postgresql/11/bin
 
 FROM haproxy AS haproxyplus
 # install dataplaneapi
