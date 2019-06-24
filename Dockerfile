@@ -109,7 +109,7 @@ COPY pg_is_master.sh /usr/local/bin/
 COPY pg_is_standby.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/*
 # create non-root user
-RUN groupadd -r haproxy && useradd -r -g haproxy haproxy
+RUN groupadd -r haproxy && useradd -r -g haproxy haproxy && mkdir -p /var/run/haproxy && chown -R haproxy:haproxy /var/run/haproxy
 # run as the non-root user
 ENTRYPOINT chown -R haproxy:proxy /etc/haproxy \
     && chmod 600 /etc/haproxy/* \
