@@ -28,6 +28,12 @@ RUN wget -O /root/gosu https://github.com/tianon/gosu/releases/download/1.11/gos
 RUN wget -O /root/dataplaneapi https://github.com/haproxytech/dataplaneapi/releases/download/v1.0.0/dataplaneapi \
     && chmod +x /root/dataplaneapi
 
+RUN wget -O haproxy-2.0.0.tgz https://github.com/haproxy/haproxy/archive/v2.0.0.tar.gz \
+    && tar xzvf haproxy-2.0.0.tgz \
+    && cd haproxy-2.0.0 \
+    && make -j4 TARGET=linux-glibc \
+    && make install
+
 FROM postgres:11 AS keeper
 ARG VERSION=8.2.1
 LABEL maintainer="Citus Data https://citusdata.com" \
@@ -82,18 +88,25 @@ ENTRYPOINT chown -R postgres:postgres /stolon-data \
     && start-stop-daemon --start --background --no-close --chuid postgres:postgres --exec /usr/local/bin/stolon-sentinel \
     && exec gosu postgres:postgres /usr/local/bin/stolon-keeper --data-dir /stolon-data --pg-bin-path /usr/lib/postgresql/11/bin
 
-FROM haproxy AS haproxyplus
-# install dataplaneapi
-COPY --from=pg_builder /root/dataplaneapi /usr/local/bin/
+FROM ubuntu:18.04 AS haproxyplus
 # install psql
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends postgresql-client-11 \
+    && apt-get install -y wget gnupg\
+    && echo "deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+    && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
+    && apt-get update \
+    && apt-get install -y postgresql-client-11\
+    && apt-get purge -y --auto-remove wget \
     && apt-get clean
+# install haproxy
+COPY --from=pg_builder /usr/local/sbin/haproxy /usr/local/sbin/haproxy
+# install dataplaneapi
+COPY --from=pg_builder /root/dataplaneapi /usr/local/bin/
+# install gosu
+COPY --from=pg_builder /root/gosu /usr/local/bin/
 # install external-check scripts
 COPY pg_is_master.sh /usr/local/bin/
 COPY pg_is_standby.sh /usr/local/bin/
-# install gosu
-COPY --from=pg_builder /root/gosu /usr/local/bin/
 RUN chmod +x /usr/local/bin/*
 # create non-root user
 RUN groupadd -r haproxy && useradd -r -g haproxy haproxy
