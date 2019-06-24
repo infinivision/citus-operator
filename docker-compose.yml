@@ -51,7 +51,10 @@ services:
     volumes:
       - type: bind
         source: /opt/data/haproxy.cfg
-        target: /usr/local/etc/haproxy/haproxy.cfg
+        target: /etc/haproxy/haproxy.cfg
+      - type: bind
+        source: /opt/data/pgpass
+        target: /etc/haproxy/pgpass
       - type: bind
         source: /usr/share/zoneinfo/Asia/Shanghai
         target: /etc/localtime

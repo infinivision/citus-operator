@@ -4,16 +4,16 @@ FROM postgres:11 AS pg_builder
 RUN apt-get update \
     && apt-get install -y postgresql-server-dev-$PG_MAJOR wget build-essential
 
-RUN wget https://github.com/ChenHuajun/pg_roaringbitmap/archive/v0.2.1.tar.gz \
-    && tar xzvf v0.2.1.tar.gz \
+RUN wget -O pg_roaringbitmap-0.2.1.tgz https://github.com/ChenHuajun/pg_roaringbitmap/archive/v0.2.1.tar.gz \
+    && tar xzvf pg_roaringbitmap-0.2.1.tgz \
     && cd pg_roaringbitmap-0.2.1 \
     && make \
     && make install \
     && tar czvf /postgresql-$PG_MAJOR-roaringbitmap-0.2.1.tgz /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/roaringbitmap* /usr/lib/postgresql/$PG_MAJOR/lib/roaringbitmap.so /usr/share/postgresql/$PG_MAJOR/extension/roaringbitmap*
 
 RUN apt-get install -y protobuf-c-compiler libprotobuf-c0-dev \
-    && wget https://github.com/citusdata/cstore_fdw/archive/v1.6.2.tar.gz \
-    && tar xzvf v1.6.2.tar.gz \
+    && wget -O cstore_fdw-1.6.2.tgz https://github.com/citusdata/cstore_fdw/archive/v1.6.2.tar.gz \
+    && tar xzvf cstore_fdw-1.6.2.tgz \
     && cd cstore_fdw-1.6.2 \
     && make \
     && make install \
@@ -52,6 +52,7 @@ RUN apt-get update \
     postgresql-$PG_MAJOR-topn=2.2.0 \
     postgresql-$PG_MAJOR-cron=1.1.4-1.pgdg90+1 \
     && apt-get purge -y --auto-remove curl \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # install roaringbitmap
@@ -84,5 +85,19 @@ ENTRYPOINT chown -R postgres:postgres /stolon-data \
 FROM haproxy AS haproxyplus
 # install dataplaneapi
 COPY --from=pg_builder /root/dataplaneapi /usr/local/bin/
+# install psql
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends postgresql-client-11 \
+    && apt-get clean
+# install external-check scripts
+COPY pg_is_master.sh /usr/local/bin/
+COPY pg_is_standby.sh /usr/local/bin/
 # install gosu
 COPY --from=pg_builder /root/gosu /usr/local/bin/
+RUN chmod +x /usr/local/bin/*
+# create non-root user
+RUN groupadd -r haproxy && useradd -r -g haproxy haproxy
+# run as the non-root user
+ENTRYPOINT chown -R haproxy:proxy /etc/haproxy \
+    && chmod 600 /etc/haproxy/* \
+    && exec gosu haproxy:haproxy /usr/local/sbin/haproxy -W -db -f /etc/haproxy/haproxy.cfg
