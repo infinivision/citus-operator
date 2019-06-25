@@ -6,5 +6,5 @@
 
 PGPASSFILE=/etc/haproxy/pgpass psql "host=$HAPROXY_SERVER_ADDR port=$HAPROXY_SERVER_PORT connect_timeout=1" --username=postgres --no-password --pset=tuples_only -c "SELECT pg_is_in_recovery();" | grep -P "^\s*t\s*$" > /dev/null
 RET=$?
-echo `date --rfc-3339=seconds` "$HAPROXY_SERVER_ADDR:$HAPROXY_SERVER_PORT pg_is_standby RET $RET"
+#echo `date --rfc-3339=seconds` "$HAPROXY_SERVER_ADDR:$HAPROXY_SERVER_PORT pg_is_standby RET $RET"
 exit "$RET"
