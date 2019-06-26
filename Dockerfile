@@ -28,10 +28,12 @@ RUN wget -O /root/gosu https://github.com/tianon/gosu/releases/download/1.11/gos
 RUN wget -O /root/dataplaneapi https://github.com/haproxytech/dataplaneapi/releases/download/v1.0.0/dataplaneapi \
     && chmod +x /root/dataplaneapi
 
-RUN wget -O haproxy-2.0.0.tgz https://github.com/haproxy/haproxy/archive/v2.0.0.tar.gz \
+# Build haproxy, refers to https://github.com/haproxytech/haproxy-docker-ubuntu/blob/master/Dockerfile-2.0
+RUN apt-get install -y libc6-dev libssl-dev libpcre3-dev zlib1g-dev liblua5.3-dev\
+    && wget -O haproxy-2.0.0.tgz https://github.com/haproxy/haproxy/archive/v2.0.0.tar.gz \
     && tar xzvf haproxy-2.0.0.tgz \
     && cd haproxy-2.0.0 \
-    && make -j4 TARGET=linux-glibc \
+    && make -j4 TARGET=linux-glibc CPU=generic USE_PCRE=1 USE_REGPARM=1 USE_OPENSSL=1 USE_ZLIB=1 USE_TFO=1 USE_LINUX_TPROXY=1 USE_LUA=1 EXTRA_OBJS="contrib/prometheus-exporter/service-prometheus.o" \
     && make install
 
 FROM postgres:11 AS keeper
@@ -58,8 +60,7 @@ RUN apt-get update \
     postgresql-$PG_MAJOR-topn=2.2.0 \
     postgresql-$PG_MAJOR-cron=1.1.4-1.pgdg90+1 \
     && apt-get purge -y --auto-remove curl \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean
 
 # install roaringbitmap
 COPY --from=pg_builder /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/roaringbitmap* /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/
@@ -91,7 +92,7 @@ ENTRYPOINT chown -R postgres:postgres /stolon-data \
 FROM ubuntu:18.04 AS haproxyplus
 # install psql
 RUN apt-get update \
-    && apt-get install -y wget gnupg\
+    && apt-get install -y wget gnupg libpcre3 zlib1g liblua5.3\
     && echo "deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
     && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
     && apt-get update \
