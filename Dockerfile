@@ -101,6 +101,6 @@ COPY --from=pg_builder /root/gosu /usr/local/bin/
 # user "haproxy" already exist
 RUN mkdir -p /var/run/haproxy && chown -R haproxy:haproxy /var/run/haproxy
 # haproxy worker processes will setuid to the user specified in haproxy.cfg. However the master(MODE_MWORKER) doesn't.
-ENTRYPOINT chown -R haproxy:proxy /etc/haproxy \
+ENTRYPOINT chown -R haproxy:haproxy /etc/haproxy \
     && chmod 600 /etc/haproxy/* \
     && exec gosu haproxy:haproxy /usr/local/sbin/haproxy -W -db -f /etc/haproxy/haproxy.cfg
