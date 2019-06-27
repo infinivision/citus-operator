@@ -1,0 +1,11 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: citus-operator
+subjects:
+- kind: ServiceAccount
+  name: citus-operator
+roleRef:
+  kind: Role
+  name: citus-operator
+  apiGroup: rbac.authorization.k8s.io

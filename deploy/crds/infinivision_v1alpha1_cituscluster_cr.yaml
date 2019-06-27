@@ -1,0 +1,14 @@
+apiVersion: infinivision.com/v1alpha1
+kind: CitusCluster
+metadata:
+  name: example-cituscluster
+spec:
+  # Add fields here
+  keeper:
+    size: 3
+    image: infinivision/stolon-keeper
+    imagePullPolicy: IfNotPresent
+  proxy:
+    size: 3
+    image: infinivision/stolon-proxy
+    imagePullPolicy: IfNotPresent
