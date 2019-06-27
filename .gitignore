@@ -28,7 +28,6 @@
 .settings
 *.iml
 .idea/
-bin/
 out/
 target/
 
