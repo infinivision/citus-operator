@@ -96,9 +96,11 @@ COPY --from=pg_builder /root/dataplaneapi /usr/local/bin/
 # install external-check scripts
 COPY pg_is_master.sh /usr/local/bin/
 COPY pg_is_standby.sh /usr/local/bin/
+# install gosu
+COPY --from=pg_builder /root/gosu /usr/local/bin/
 # user "haproxy" already exist
 RUN mkdir -p /var/run/haproxy && chown -R haproxy:haproxy /var/run/haproxy
-# haproxy will setuid to the user specified in haproxy.cfg
+# haproxy worker processes will setuid to the user specified in haproxy.cfg. However the master(MODE_MWORKER) doesn't.
 ENTRYPOINT chown -R haproxy:proxy /etc/haproxy \
     && chmod 600 /etc/haproxy/* \
-    && exec /usr/local/sbin/haproxy -W -db -f /etc/haproxy/haproxy.cfg
+    && exec gosu haproxy:haproxy /usr/local/sbin/haproxy -W -db -f /etc/haproxy/haproxy.cfg
