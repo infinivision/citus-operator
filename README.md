@@ -3,10 +3,10 @@
 ## Run postgresql cluster on localhost
 
 ```bash
-$ sudo mkdir -p /opt/data
-$ sudo cp *.yml cluster_spec.json *_env.txt haproxy.cfg /opt/data
+$ sudo mkdir -p /opt/data/haproxy /opt/data/prometheus-data /opt/data/stolon-data0 /opt/data/stolon-data1 /opt/data/stolon-data2
+$ sudo cp haproxy.cfg pgpass /opt/data/haproxy
+$ sudo cp *.yml cluster_spec.json *_env.txt /opt/data
 $ cd /opt/data
-$ sudo mkdir -p prometheus-data stolon-data0 stolon-data1 stolon-data2
 $ sudo docker-compose up -d
 # initialize cluster spec in etcd
 $ /usr/local/bin/stolonctl --cluster-name stolon-cluster --store-backend=etcdv3 init -f /opt/data/cluster_spec.json
