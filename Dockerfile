@@ -25,7 +25,7 @@ RUN wget https://github.com/sorintlab/stolon/releases/download/v0.13.0/stolon-v0
 RUN wget -O /root/gosu https://github.com/tianon/gosu/releases/download/1.11/gosu-amd64 \
     && chmod +x /root/gosu
 
-RUN wget -O /root/dataplaneapi https://github.com/haproxytech/dataplaneapi/releases/download/v1.0.0/dataplaneapi \
+RUN wget -O /root/dataplaneapi https://github.com/haproxytech/dataplaneapi/releases/download/v1.0.1/dataplaneapi \
     && chmod +x /root/dataplaneapi
 
 FROM postgres:11 AS keeper
@@ -81,7 +81,7 @@ ENTRYPOINT chown -R postgres:postgres /stolon-data \
     && start-stop-daemon --start --background --no-close --chuid postgres:postgres --exec /usr/local/bin/stolon-sentinel \
     && exec gosu postgres:postgres /usr/local/bin/stolon-keeper --data-dir /stolon-data --pg-bin-path /usr/lib/postgresql/11/bin
 
-FROM haproxytech/haproxy-ubuntu:2.0.0 AS haproxyplus
+FROM haproxytech/haproxy-ubuntu:latest AS haproxyplus
 # install psql
 RUN apt-get update \
     && apt-get install -y wget gnupg \
