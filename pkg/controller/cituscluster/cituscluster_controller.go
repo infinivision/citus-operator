@@ -4,6 +4,7 @@ import (
 	"context"
 
 	infinivisionv1alpha1 "github.com/infinivision/citus-operator/pkg/apis/infinivision/v1alpha1"
+	"github.com/infinivision/citus-operator/pkg/util"
 	clusterutil "github.com/infinivision/citus-operator/pkg/util/cluster"
 	apps "k8s.io/api/apps/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -106,7 +107,9 @@ func (r *ReconcileCitusCluster) Reconcile(request reconcile.Request) (reconcile.
 	err = r.client.Get(context.TODO(), types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, ss)
 	if err != nil && errors.IsNotFound(err) {
 		// TODO: should initialize the stolon cluster
-		// stolonctl --cluster-name=kube-stolon --store-backend=kubernetes --kube-resource-kind=configmap init
+		if err := r.initCluster(instance); err != nil {
+			return reconcile.Result{}, err
+		}
 		reqLogger.Info("Creating a new Statefulset for the stolon keeper", "Namespace", instance.Namespace, "Name", instance.Name)
 		ss = clusterutil.NewKeeperStatefulset(instance)
 		// Set CitusCluster instance as the owner and controller
@@ -164,4 +167,18 @@ func (r *ReconcileCitusCluster) Reconcile(request reconcile.Request) (reconcile.
 	}
 
 	return reconcile.Result{}, nil
+}
+
+// initCluster init the stolon cluster
+func (r *ReconcileCitusCluster) initCluster(clus *infinivisionv1alpha1.CitusCluster) error {
+	// stolonctl --cluster-name=kube-stolon --store-backend=kubernetes --kube-resource-kind=configmap init
+	_, result, err := util.ExecCommand("/bin/stolon-ctl", []string{"--cluster-name=" + clus.ClusterName,
+		"--store-backend=kubernetes", "--kube-resource-kind=configmap", "init"})
+	log.V(3).Info("init cluster result:", result)
+	if err != nil {
+		log.Error(err, "init cluster failed.")
+		return err
+	}
+
+	return nil
 }
