@@ -19,8 +19,8 @@ RUN apt-get install -y protobuf-c-compiler libprotobuf-c0-dev \
     && make install \
     && tar czvf /postgresql-$PG_MAJOR-cstore_fdw-1.6.2.tgz /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/cstore_fdw* /usr/lib/postgresql/$PG_MAJOR/lib/cstore_fdw.so /usr/share/postgresql/$PG_MAJOR/extension/cstore_fdw*
 
-RUN wget https://github.com/sorintlab/stolon/releases/download/v0.13.0/stolon-v0.13.0-linux-amd64.tar.gz \
-    && tar -C /root/ -xzvf stolon-v0.13.0-linux-amd64.tar.gz
+RUN wget https://github.com/infinivision/stolon/releases/download/v0.13.1/stolon-v0.13.1-linux-amd64.tar.gz \
+    && tar -C /root/ -xzvf stolon-v0.13.1-linux-amd64.tar.gz
 
 RUN wget -O /root/gosu https://github.com/tianon/gosu/releases/download/1.11/gosu-amd64 \
     && chmod +x /root/gosu
@@ -69,9 +69,9 @@ COPY --from=pg_builder /usr/lib/x86_64-linux-gnu/libprotobuf-c.so.1 /usr/lib/x86
 RUN echo "shared_preload_libraries='citus, pg_cron, cstore_fdw'" >> /usr/share/postgresql/postgresql.conf.sample
 
 # install stolon-keeper
-COPY --from=pg_builder /root/stolon-v0.13.0-linux-amd64/bin/stolon-keeper /usr/local/bin/
+COPY --from=pg_builder /root/stolon-keeper /usr/local/bin/
 # install stolon-sentinel
-COPY --from=pg_builder /root/stolon-v0.13.0-linux-amd64/bin/stolon-sentinel /usr/local/bin/
+COPY --from=pg_builder /root/stolon-sentinel /usr/local/bin/
 
 # install gosu
 COPY --from=pg_builder /root/gosu /usr/local/bin/
