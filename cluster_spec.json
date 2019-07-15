@@ -11,6 +11,7 @@
         "log_connections": "on",
         "log_disconnections": "on",
         "log_line_prefix": "%m [%p] ",
-        "log_timezone": "PRC"
+        "log_timezone": "PRC",
+        "log_min_duration_statement": "3s"
     }
 }
