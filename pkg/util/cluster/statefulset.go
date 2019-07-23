@@ -14,6 +14,8 @@ import (
 
 const (
 	defaultKeeperStorageSize = "5Gi"
+	// KeeperPort the keeper port
+	KeeperPort int = 5432
 )
 
 // GetOwnerRef returns CitusCluster's OwnerReference
@@ -30,6 +32,7 @@ func GetOwnerRef(cc *api.CitusCluster) metav1.OwnerReference {
 	}
 }
 
+// NewKeeperStatefulset new a keeper statefulset
 func NewKeeperStatefulset(cc *api.CitusCluster) *apps.StatefulSet {
 	instanceName := cc.GetLabels()[label.InstanceLabelKey]
 	keeperLabel := label.New().Instance(instanceName).Keeper()
@@ -64,13 +67,13 @@ func NewKeeperStatefulset(cc *api.CitusCluster) *apps.StatefulSet {
 		"/bin/bash",
 		"-ec",
 		`IFS='-' read -ra ADDR <<< "$(hostname)"
-		export STKEEPER_UID=keeper"${ADDR[-1]}"
-		export POD_IP=$(hostname -i)
-		export STKEEPER_PG_LISTEN_ADDRESS=$POD_IP
-		export STOLON_DATA=/stolon-data
-		chown stolon:stolon $STOLON_DATA
-		exec gosu stolon stolon-sentinel &;
-		exec gosu stolon stolon-keeper --data-dir $STOLON_DATA&`,
+		 export STKEEPER_UID=keeper"${ADDR[-1]}"
+		 export POD_IP=$(hostname -i)
+		 export STKEEPER_PG_LISTEN_ADDRESS=$POD_IP
+		 export STOLON_DATA=/stolon-data
+		 chown stolon:stolon $STOLON_DATA
+		 exec gosu stolon stolon-sentinel &;
+		 exec gosu stolon stolon-keeper --data-dir $STOLON_DATA&`,
 	}
 	ss := &apps.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
@@ -100,7 +103,7 @@ func NewKeeperStatefulset(cc *api.CitusCluster) *apps.StatefulSet {
 							Ports: []corev1.ContainerPort{
 								{
 									Name:          "keeperPort",
-									ContainerPort: int32(5432),
+									ContainerPort: int32(KeeperPort),
 									Protocol:      corev1.ProtocolTCP,
 								},
 								{
@@ -205,6 +208,7 @@ func NewKeeperStatefulset(cc *api.CitusCluster) *apps.StatefulSet {
 	return ss
 }
 
+// VolumeClaimTemplates volume claim templates
 func VolumeClaimTemplates(q resource.Quantity, metaName string, storageClassName *string) corev1.PersistentVolumeClaim {
 	return corev1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{Name: metaName},

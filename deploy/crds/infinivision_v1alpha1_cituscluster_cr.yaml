@@ -9,6 +9,6 @@ spec:
     image: infinivision/stolon-keeper
     imagePullPolicy: IfNotPresent
   proxy:
-    size: 3
-    image: infinivision/stolon-proxy
-    imagePullPolicy: IfNotPresent
+    masterPort: 5432
+    standbyPort: 5433
+    type: NodePort

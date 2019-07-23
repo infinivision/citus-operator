@@ -47,6 +47,7 @@ type ContainerSpec struct {
 	Limits          *ResourceRequirement `json:"limits,omitempty"`
 }
 
+// KeeperSpec the keeper specification
 type KeeperSpec struct {
 	ContainerSpec
 	Size                 int32               `json:"size"`
@@ -56,12 +57,11 @@ type KeeperSpec struct {
 	Tolerations          []corev1.Toleration `json:"tolerations,omitempty"`
 }
 
+// ProxySpec the proxy specification
 type ProxySpec struct {
-	ContainerSpec
-	Size                 int32               `json:"size"`
-	NodeSelector         map[string]string   `json:"nodeSelector,omitempty"`
-	NodeSelectorRequired bool                `json:"nodeSelectorRequired,omitempty"`
-	Tolerations          []corev1.Toleration `json:"tolerations,omitempty"`
+	MasterPort  int32  `json:"masterPort"`
+	StandbyPort int32  `json:"standbyPort"`
+	Type        string `json:"type,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

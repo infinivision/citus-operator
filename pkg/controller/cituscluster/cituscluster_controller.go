@@ -173,7 +173,7 @@ func (r *ReconcileCitusCluster) Reconcile(request reconcile.Request) (reconcile.
 func (r *ReconcileCitusCluster) initCluster(clus *infinivisionv1alpha1.CitusCluster) error {
 	// stolonctl --cluster-name=kube-stolon --store-backend=kubernetes --kube-resource-kind=configmap init
 	_, result, err := util.ExecCommand("/bin/stolon-ctl", []string{"--cluster-name=" + clus.ClusterName,
-		"--store-backend=kubernetes", "--kube-resource-kind=configmap", "init"})
+		"--store-backend=kubernetes", "--kube-resource-kind=configmap", "init", "/opt/data/cluster_spec.json"})
 	log.V(3).Info("init cluster result:", result)
 	if err != nil {
 		log.Error(err, "init cluster failed.")

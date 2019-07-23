@@ -25,7 +25,9 @@ func TestNewKeeperStatefulset(t *testing.T) {
 				Size: 3,
 			},
 			Proxy: v1alpha1.ProxySpec{
-				Size: 3,
+				MasterPort:  5432,
+				StandbyPort: 5433,
+				Type:        "ClusterIP",
 			},
 		},
 	}
